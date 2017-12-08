@@ -31,9 +31,10 @@ def get_bestsellers_data(url):
                       replace(",", ""))
         price = b.find("span", class_="p13n-sc-price").text[1:]
 
-        if rating > 3.5 and reviews > 300:
-            dep_bestsellers.append({"name": name, "rating": rating,
-                                   "reviews": reviews, "price": float(price)})
+        if reviews > 300:
+            b = {"name": name, "rating": rating, "reviews": reviews,
+                 "price": float(price)}
+            dep_bestsellers.append(b)
 
     return dep_bestsellers
 
@@ -63,17 +64,27 @@ def filter_data(dict, key, value):
 def main():
     dep_urls = get_department_urls()
     bestsellers = get_bestsellers(dep_urls)
-    # print(bestsellers)
+    print("Found {} bestsellers".format(len(bestsellers)))
+
+    # Remove duplicates
+    bestsellers = [dict(t) for t in set([tuple(d.items())
+                                         for d in bestsellers])]
+    print("Removed duplcates\n {}".format(len(bestsellers)))
+
     sorted_b = sorted(bestsellers, key=itemgetter('price', 'reviews'))
     p = get_percentile([b['price'] for b in sorted_b], 95)
-    print("Percentile is: {}".format(p))
+    print("Percentile value is: {}".format(p))
 
     # Filter by percentile
-    reduced_b = filter_data(dict=sorted_b, key='price', value=p)
+    filtered_b = filter_data(dict=sorted_b, key='price', value=p)
+    print("Filtered to {}".format(len(filtered_b)))
 
-    x_values = [b['price'] for b in reduced_b]
-    x_values = np.array(x_values)
-    y_values = [b['reviews'] for b in reduced_b]
+    x_values = [b['price'] for b in filtered_b]
+    y_values = [b['reviews'] for b in filtered_b]
+
+    # Print the name of top item
+    top_name = [b['name'] for b in filtered_b if b['reviews'] == max(y_values)]
+    print("The most reviewed is {}".format(top_name))
 
     # Set the size of the plotting window.
     plt.figure(dpi=128, figsize=(10, 6))
