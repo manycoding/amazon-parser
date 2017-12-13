@@ -6,10 +6,11 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def draw_2d(x_values, y_values):
     plt.figure(dpi=128, figsize=(10, 6))
-    plt.set_xlabel('$')
-    plt.set_ylabel('Reviews')
+    ax = plt.gca()
+    ax.set_xlabel('$')
+    ax.set_ylabel('Reviews')
 
-    plt.scatter(x_values, y_values, edgecolor='none', s=3)
+    ax.scatter(x_values, y_values, edgecolor='none', s=3)
     plt.show()
 
 
